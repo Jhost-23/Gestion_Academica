@@ -1,0 +1,100 @@
+
+--CREATE TABLE `usuarios` ( 
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `nombre_completo` varchar(100) NOT NULL,
+  `correo` varchar(150) NOT NULL,
+  `usuario` varchar(50) NOT NULL UNIQUE, -- Asegúrate de que el usuario sea único
+  `contrasena` varchar(255) NOT NULL,
+  `numero_tel` varchar(15) DEFAULT NULL,
+  `rol` enum('administrador','profesor','estudiante') NOT NULL DEFAULT 'estudiante',
+  `creado_en` timestamp NOT NULL DEFAULT current_timestamp(),
+  `actualizado_en` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
+  PRIMARY KEY (`id`)
+);
+
+
+--CREATE TABLE `alumnos` (
+  `carnet` int(11) NOT NULL,
+  `nombre` varchar(40) NOT NULL,
+  `apellido` varchar(40) NOT NULL,
+  `usuario` varchar(50) NOT NULL,
+  `id_grado` int(11) DEFAULT NULL,
+  `estado` enum('activo','inactivo') NOT NULL DEFAULT 'activo',
+  `creado_en` timestamp NOT NULL DEFAULT current_timestamp(),
+  `actualizado_en` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
+  `descripcion` text DEFAULT NULL,
+  PRIMARY KEY (`carnet`)
+);
+
+--CREATE TABLE `cursos` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `nombre_curso` varchar(100) NOT NULL,
+  `descripcion` text NOT NULL,
+  `id_profesor` int(11) DEFAULT NULL,
+  `id_grado` int(11) DEFAULT NULL,
+  `creado_en` timestamp NOT NULL DEFAULT current_timestamp(),
+  `actualizado_en` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
+  PRIMARY KEY (`id`)
+);
+
+
+--CREATE TABLE `asignacion_cursos` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `carnet` int(11) NOT NULL,
+  `id_curso` int(11) NOT NULL,
+  `creado_en` timestamp NOT NULL DEFAULT current_timestamp(),
+  PRIMARY KEY (`id`),
+  FOREIGN KEY (`carnet`) REFERENCES `alumnos`(`carnet`) ON DELETE CASCADE ON UPDATE CASCADE,
+  FOREIGN KEY (`id_curso`) REFERENCES `cursos`(`id`) ON DELETE CASCADE ON UPDATE CASCADE
+);
+
+
+--CREATE TABLE `asistencia` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `carnet` int(11) NOT NULL,
+  `id_curso` int(11) NOT NULL,
+  `fecha` date NOT NULL,
+  `estado` enum('presente','ausente','tarde') NOT NULL,
+  `creado_en` timestamp NOT NULL DEFAULT current_timestamp(),
+  PRIMARY KEY (`id`),
+  CONSTRAINT `fk_asistencia_alumnos` FOREIGN KEY (`carnet`) REFERENCES `alumnos`(`carnet`) ON DELETE CASCADE, -- Clave foránea referenciando a alumnos
+  CONSTRAINT `fk_asistencia_cursos` FOREIGN KEY (`id_curso`) REFERENCES `cursos`(`id`) ON DELETE CASCADE -- Clave foránea referenciando a cursos
+);
+
+CREATE TABLE `calificaciones` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `carnet` int(11) NOT NULL,
+  `id_curso` int(11) NOT NULL,
+  `unidad` varchar(20) NOT NULL,
+  `nota` decimal(5,2) NOT NULL,
+  `creado_en` timestamp NOT NULL DEFAULT current_timestamp(),
+  PRIMARY KEY (`id`),
+  CONSTRAINT `fk_calificaciones_alumnos` FOREIGN KEY (`carnet`) REFERENCES `alumnos`(`carnet`) ON DELETE CASCADE, -- Clave foránea referenciando a alumnos
+  CONSTRAINT `fk_calificaciones_cursos` FOREIGN KEY (`id_curso`) REFERENCES `cursos`(`id`) ON DELETE CASCADE -- Clave foránea referenciando a cursos
+);
+
+
+CREATE TABLE `especialidades` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `descripcion` varchar(45) NOT NULL,
+  PRIMARY KEY (`id`)
+);
+
+
+--CREATE TABLE `grado` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `grado` varchar(30) NOT NULL,
+  PRIMARY KEY (`id`)
+);
+
+--CREATE TABLE `profesores` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `nombre` varchar(50) NOT NULL,
+  `apellido` varchar(50) NOT NULL,
+  `especialidad` varchar(100) NOT NULL,
+  `id_usuario` int(11) NOT NULL,
+  `creado_en` timestamp NOT NULL DEFAULT current_timestamp(),
+  `actualizado_en` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
+  PRIMARY KEY (`id`),
+  CONSTRAINT `fk_profesores_usuario` FOREIGN KEY (`id_usuario`) REFERENCES `usuarios`(`id`) ON DELETE CASCADE -- Clave foránea referenciando a usuarios
+);
